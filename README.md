@@ -13,7 +13,7 @@ sudo usermod -aG docker $USER
 **Please restart the pi after the install**
 2. Build docker contrainer
 ```bash
-  docker build -t ros2_humble_pi .
+docker build -t ros2_humble_pi .
    ```
 3. Start
 ```bash
