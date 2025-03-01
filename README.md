@@ -10,6 +10,7 @@ sudo apt install -y docker.io
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
    ```
+**Please restart the pi after the install**
 2. Build docker contrainer
 ```bash
   docker build -t ros2_humble_pi .
