@@ -2,11 +2,13 @@
 
 How to use:
 
-## 1. Install docker
+## 1. Install docker & other requirements
 ```bash
 sudo apt update
 sudo apt upgrade -y
 sudo apt install -y docker.io
+sudo apt-get install -y raspberrypi-kernel-headers
+sudo modprobe ch341
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
    ```
@@ -16,7 +18,12 @@ sudo usermod -aG docker $USER
 ```bash
 docker build -t ros2_humble_pi .
    ```
-## 3. Start the docker containter
+## 3. Check which USB port
+```bash
+ls -l /dev/ttyUSB*
+   ```
+
+## 4. Start the docker containter
 ```bash
 docker run -it --rm --privileged --device=/dev/ttyUSB0 --network=host ros2_humble_pi
    ```
@@ -33,7 +40,7 @@ ros2_humble_pi: The name of the image we built
 
 --device=/dev/ttyUSB0: Connects to USB0
 
-## 4. Working with Your Own ROS2 Code and Mount Directory
+## 5. Working with Your Own ROS2 Code and Mount Directory
 If you want to develop and run your own ROS2 code:
 
 Mount Your Code Directory
