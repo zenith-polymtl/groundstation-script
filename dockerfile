@@ -9,13 +9,19 @@ RUN apt-get update && apt-get install -y locales && \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-# Install dependencies for adding ROS2 repository and Python 3.11
+# Install dependencies for adding ROS2 repository, Python 3.11, and build tools
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     curl \
     gnupg2 \
     lsb-release \
-    git
+    git \
+    build-essential \
+    gcc \
+    unzip \
+    linux-modules-extra-$(uname -r) \
+    usbutils \
+    kmod
 
 # Add Universe repository
 RUN add-apt-repository universe
@@ -57,6 +63,33 @@ RUN apt-get update && apt-get install -y \
 # Initialize rosdep
 RUN rosdep init && rosdep update
 
+# Install canusb module
+RUN mkdir -p /opt/canusb && \
+    cd /opt/canusb && \
+    git clone https://github.com/kobolt/usb-can . && \
+    gcc -o canusb canusb.c && \
+    # Add to PATH
+    ln -sf /opt/canusb/canusb /usr/local/bin/canusb
+
+# Install CH341 driver (Note: This requires privileged container to work)
+RUN mkdir -p /opt/ch341 && \
+    cd /opt/ch341 && \
+    git clone https://github.com/SeeedDocument/USB-CAN-Analyzer.git && \
+    cd USB-CAN-Analyzer/res/Driver && \
+    unzip CH341SER_LINUX.ZIP && \
+    cd CH341SER_LINUX && \
+    make
+
+# Add a script to load the CH341 driver when needed
+RUN echo '#!/bin/bash\n\
+if [ -f /opt/ch341/USB-CAN-Analyzer/res/Driver/CH341SER_LINUX/ch34x.ko ]; then\n\
+  insmod /opt/ch341/USB-CAN-Analyzer/res/Driver/CH341SER_LINUX/ch34x.ko\n\
+  echo "CH341 driver loaded"\n\
+else\n\
+  echo "CH341 driver not found"\n\
+fi' > /usr/local/bin/load-ch341 && \
+chmod +x /usr/local/bin/load-ch341
+
 # Set up the entrypoint
 COPY ./ros_entrypoint.sh /
 RUN chmod +x /ros_entrypoint.sh
@@ -67,9 +100,6 @@ RUN python3 --version && pip --version
 
 # Clone the repository
 RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws/src/ros2-mission-2
-
-# Install python pakcages
-RUN pip3 install -r /ros2_ws/src/ros2-mission-2/requirements.txt
 
 # Set the default command to bash
 CMD ["bash"]

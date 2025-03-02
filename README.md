@@ -18,7 +18,7 @@ docker build -t ros2_humble_pi .
    ```
 ## 3. Start the docker containter
 ```bash
-docker run -it --rm --network=host ros2_humble_pi
+docker run -it --rm --privileged --device=/dev/ttyUSB0 --network=host ros2_humble_pi
    ```
 
 -it: Runs interactively with a terminal
@@ -29,6 +29,10 @@ docker run -it --rm --network=host ros2_humble_pi
 
 ros2_humble_pi: The name of the image we built
 
+--privileged: Makes sure it can access USB devices
+
+--device=/dev/ttyUSB0: Connects to USB0
+
 ## 4. Working with Your Own ROS2 Code and Mount Directory
 If you want to develop and run your own ROS2 code:
 
@@ -37,7 +41,7 @@ Exit both containers (CTRL+C to stop the nodes, then type exit), then start a ne
 
 ```bash
 
-docker run -it --rm --network=host -v /path/to/your/ros2_ws:/ros2_ws ros2_humble_pi
+docker run -it --rm --privileged --device=/dev/ttyUSB0 --network=host -v /path/to/your/ros2_ws:/ros2_ws ros2_humble_pi
 ```
 Replace /path/to/your/ros2_ws with the actual path to your ROS2 workspace on your Raspberry Pi.
 
