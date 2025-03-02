@@ -29,8 +29,6 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
     http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
     | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-# Update and upgrade to avoid systemd/udev issues mentioned in the warning
-RUN apt-get update && apt-get upgrade -y
 
 # Install Python 3.11 and pip
 RUN apt-get update && apt-get install -y \
