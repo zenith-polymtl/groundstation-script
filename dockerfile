@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y locales && \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-# Install dependencies for adding ROS2 repository
+# Install dependencies for adding ROS2 repository and Python 3.11
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     curl \
@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y \
 
 # Add Universe repository
 RUN add-apt-repository universe
+
+# Add deadsnakes PPA for Python 3.11
+RUN add-apt-repository ppa:deadsnakes/ppa
 
 # Add ROS2 GPG key and repository
 RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
@@ -28,6 +31,17 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
 
 # Update and upgrade to avoid systemd/udev issues mentioned in the warning
 RUN apt-get update && apt-get upgrade -y
+
+# Install Python 3.11 and pip
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
+    python3-pip \
+    && ln -sf /usr/bin/python3.11 /usr/bin/python3 \
+    && ln -sf /usr/bin/python3.11 /usr/bin/python \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11 \
+    && python3 -m pip install --upgrade pip
 
 # Install ROS2 Humble (base version for better performance on Raspberry Pi)
 # You can change to ros-humble-desktop if you need GUI tools and have sufficient resources
@@ -47,6 +61,8 @@ COPY ./ros_entrypoint.sh /
 RUN chmod +x /ros_entrypoint.sh
 ENTRYPOINT ["/ros_entrypoint.sh"]
 
+# Verify Python and pip versions
+RUN python3 --version && pip --version
+
 # Set the default command to bash
 CMD ["bash"]
-
