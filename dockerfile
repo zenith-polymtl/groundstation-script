@@ -38,16 +38,31 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
 # Update and upgrade to avoid systemd/udev issues mentioned in the warning
 RUN apt-get update && apt-get upgrade -y
 
-# Install Python 3.11 and pip
+# Install Python 3.10 and pip
 RUN apt-get update && apt-get install -y \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
+    python3 \
+    python3-venv \
+    python3-dev \
     python3-pip \
-    && ln -sf /usr/bin/python3.11 /usr/bin/python3 \
-    && ln -sf /usr/bin/python3.11 /usr/bin/python \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11 \
     && python3 -m pip install --upgrade pip
+
+RUN python3 -m pip install -U \
+    colcon-common-extensions \
+    vcstool \
+    rosdep \
+    pytest-cov \
+    pytest-repeat \
+    pytest-rerunfailures \
+    flake8 \
+    flake8-blind-except \
+    flake8-builtins \
+    flake8-class-newline \
+    flake8-comprehensions \
+    flake8-deprecated \
+    flake8-docstrings \
+    flake8-import-order \
+    flake8-quotes \
+    setuptools==65.7.0
 
 # Install ROS2 Humble (base version for better performance on Raspberry Pi)
 RUN apt-get update && apt-get install -y \
@@ -56,6 +71,8 @@ RUN apt-get update && apt-get install -y \
     python3-colcon-common-extensions \
     python3-rosdep \
     python3-argcomplete \
+    ros-humble-cv-bridge \
+    ros-humble-vision-opencv \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize rosdep
@@ -98,7 +115,9 @@ ENTRYPOINT ["/ros_entrypoint.sh"]
 RUN python3 --version && pip --version
 
 # Clone the repository
-RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws/src/ros2-mission-2
+RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws
+
+RUN pip3 install -r /ros2_ws/requirements.txt
 
 # Set the default command to bash
 CMD ["bash"]

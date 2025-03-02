@@ -40,19 +40,17 @@ ros2_humble_pi: The name of the image we built
 
 --device=/dev/ttyUSB0: Connects to USB0
 
-## 5. Working with Your Own ROS2 Code and Mount Directory
-If you want to develop and run your own ROS2 code:
-
-Mount Your Code Directory
-Exit both containers (CTRL+C to stop the nodes, then type exit), then start a new container with your code directory mounted:
-
+## 6. Verify that ch341 driver is working:
 ```bash
-
-docker run -it --rm --privileged --device=/dev/ttyUSB0 --network=host -v /path/to/your/ros2_ws:/ros2_ws ros2_humble_pi
+ls -l /sys/class/tty/ttyUSB0/device/driver
 ```
-Replace /path/to/your/ros2_ws with the actual path to your ROS2 workspace on your Raspberry Pi.
+You should see something like this:
+```bash
+/sys/class/tty/ttyUSB0/device/driver -> ../../../../../../../../../../bus/usb-serial/drivers/ch341-uart
+```
 
-Build and Run Your Code
+## 5. Start the code!
+
 
 Inside the container:
 
@@ -61,5 +59,5 @@ Inside the container:
 cd /ros2_ws
 colcon build
 source install/setup.bash
-ros2 run your_package your_node
+ros2 launch start_mission start.launch.py
 ```
