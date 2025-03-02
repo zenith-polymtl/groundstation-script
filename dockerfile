@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     curl \
     gnupg2 \
-    lsb-release
+    lsb-release \
+    git
 
 # Add Universe repository
 RUN add-apt-repository universe
@@ -29,6 +30,8 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
     http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
     | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
+# Update and upgrade to avoid systemd/udev issues mentioned in the warning
+RUN apt-get update && apt-get upgrade -y
 
 # Install Python 3.11 and pip
 RUN apt-get update && apt-get install -y \
@@ -61,6 +64,12 @@ ENTRYPOINT ["/ros_entrypoint.sh"]
 
 # Verify Python and pip versions
 RUN python3 --version && pip --version
+
+# Clone the repository
+RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws/src/ros2-mission-2
+
+# Install python pakcages
+RUN pip3 install -r /ros2_ws/src/ros2-mission-2/requirements.txt
 
 # Set the default command to bash
 CMD ["bash"]
