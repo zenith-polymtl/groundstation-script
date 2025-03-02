@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y locales && \
 ENV LANG=en_US.UTF-8
 
 # Install dependencies for adding ROS2 repository, Python 3.11, and build tools
+# Added linux-headers-generic to provide kernel headers
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     curl \
@@ -18,8 +19,8 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     gcc \
+    linux-headers-generic \
     unzip \
-    linux-modules-extra-$(uname -r) \
     usbutils \
     kmod
 
@@ -71,24 +72,44 @@ RUN mkdir -p /opt/canusb && \
     # Add to PATH
     ln -sf /opt/canusb/canusb /usr/local/bin/canusb
 
-# Install CH341 driver (Note: This requires privileged container to work)
+# Create a script to build and load the CH341 driver at runtime
+# This is more reliable than trying to build during image creation
 RUN mkdir -p /opt/ch341 && \
     cd /opt/ch341 && \
     git clone https://github.com/SeeedDocument/USB-CAN-Analyzer.git && \
     cd USB-CAN-Analyzer/res/Driver && \
     unzip CH341SER_LINUX.ZIP && \
     cd CH341SER_LINUX && \
-    make
-
-# Add a script to load the CH341 driver when needed
-RUN echo '#!/bin/bash\n\
-if [ -f /opt/ch341/USB-CAN-Analyzer/res/Driver/CH341SER_LINUX/ch34x.ko ]; then\n\
-  insmod /opt/ch341/USB-CAN-Analyzer/res/Driver/CH341SER_LINUX/ch34x.ko\n\
-  echo "CH341 driver loaded"\n\
+    # Create a script to build and load the module at runtime
+    echo '#!/bin/bash\n\
+echo "Building CH341 driver for kernel $(uname -r)"\n\
+cd /opt/ch341/USB-CAN-Analyzer/res/Driver/CH341SER_LINUX\n\
+rm -f *.ko *.o *.mod.* Module.*\n\
+make clean\n\
+# Try to install specific kernel headers if generic ones don't work\n\
+if [ ! -d "/lib/modules/$(uname -r)/build" ]; then\n\
+  echo "Kernel headers not found, attempting to install..."\n\
+  apt-get update && apt-get install -y linux-headers-$(uname -r) || true\n\
+fi\n\
+# If headers still not available, try to use the generic ones\n\
+if [ ! -d "/lib/modules/$(uname -r)/build" ] && [ -d "/usr/src/linux-headers-generic" ]; then\n\
+  echo "Using generic headers"\n\
+  ln -sf /usr/src/linux-headers-generic /lib/modules/$(uname -r)/build\n\
+fi\n\
+# Attempt to build\n\
+make\n\
+if [ -f "ch34x.ko" ]; then\n\
+  echo "CH341 driver compiled successfully"\n\
+  # Load the module if running in privileged mode\n\
+  if [ -w "/sys/module" ]; then\n\
+    insmod ch34x.ko && echo "CH341 driver loaded successfully"\n\
+  else\n\
+    echo "Container not running in privileged mode, cannot load module"\n\
+  fi\n\
 else\n\
-  echo "CH341 driver not found"\n\
-fi' > /usr/local/bin/load-ch341 && \
-chmod +x /usr/local/bin/load-ch341
+  echo "CH341 driver compilation failed"\n\
+fi' > /usr/local/bin/build-ch341-driver && \
+    chmod +x /usr/local/bin/build-ch341-driver
 
 # Set up the entrypoint
 COPY ./ros_entrypoint.sh /
