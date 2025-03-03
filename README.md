@@ -68,4 +68,15 @@ cd /ros2_ws
 colcon build
 source install/setup.bash
 ros2 launch start_mission start.launch.py
+
+ros2 run mission winch
+```
+## To use VNC for graphical interface:
+
+Download this: https://www.realvnc.com/en/connect/download/viewer/
+
+And use this command to run before launching ros2 script
+```bash
+export QT_QPA_PLATFORM=vnc
+ros2 run mission control
 ```
