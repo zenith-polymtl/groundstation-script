@@ -116,8 +116,23 @@ RUN apt-get update && apt-get install -y \
   libxcb-icccm4 \
   libxcb-keysyms1 \
   libxcb-shape0 \
+  x11-apps \ 
+  x11-utils \
+  xauth \
   && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --only-binary=PyQt6 PyQt6
+
+RUN apt-get update && apt-get install -y \
+  libxcb-cursor0 \
+  libxcb-xinerama0 \
+  libxcb-randr0 \
+  libxcb-icccm4 \
+  libxcb-keysyms1 \
+  libxcb-shape0 \
+  libxcb-render-util0 \
+  libxcb-xkb1 \
+  libxkbcommon-x11-0
+
 
 # Set up the entrypoint
 COPY ./ros_entrypoint.sh /
@@ -127,17 +142,7 @@ ENTRYPOINT ["/ros_entrypoint.sh"]
 # Verify Python and pip versions
 RUN python3 --version && pip --version
 
-# Add cache busting for the git clone command
-ARG CACHEBUST=1
-RUN echo "Cache bust: ${CACHEBUST}" > /dev/null
-# Clone the repository
-RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws
-
-# Add cache busting for the pip install command
-ARG CACHEBUST2=1
-RUN echo "Cache bust: ${CACHEBUST2}" > /dev/null
-# Install requirements
-RUN pip3 install -r /ros2_ws/requirements.txt
+RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
 
 # Set the default command to bash
 CMD ["bash"]

@@ -5,12 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - CACHEBUST=123  # Change this value to force rebuild
-        - CACHEBUST2=456
     container_name: ros2-mission
     environment:
-      - DISPLAY=localhost:0.0
+      - DISPLAY=:1  # Change this to match your VNC server's display number
       - QT_X11_NO_MITSHM=1
       - LIBGL_ALWAYS_INDIRECT=1
     volumes:
