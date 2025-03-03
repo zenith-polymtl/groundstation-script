@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y locales && \
 ENV LANG=en_US.UTF-8
 
 # Install dependencies for adding ROS2 repository, Python 3.11, and build tools
-# Added linux-headers-generic to provide kernel headers
 RUN apt-get update && apt-get install -y \
     software-properties-common \
     curl \
@@ -19,7 +18,6 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     gcc \
-    linux-headers-generic \
     unzip \
     usbutils \
     kmod
@@ -40,25 +38,41 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
 # Update and upgrade to avoid systemd/udev issues mentioned in the warning
 RUN apt-get update && apt-get upgrade -y
 
-# Install Python 3.11 and pip
+# Install Python 3.10 and pip
 RUN apt-get update && apt-get install -y \
-    python3.11 \
-    python3.11-venv \
-    python3.11-dev \
+    python3 \
+    python3-venv \
+    python3-dev \
     python3-pip \
-    && ln -sf /usr/bin/python3.11 /usr/bin/python3 \
-    && ln -sf /usr/bin/python3.11 /usr/bin/python \
-    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11 \
     && python3 -m pip install --upgrade pip
 
+RUN python3 -m pip install -U \
+    colcon-common-extensions \
+    vcstool \
+    rosdep \
+    pytest-cov \
+    pytest-repeat \
+    pytest-rerunfailures \
+    flake8 \
+    flake8-blind-except \
+    flake8-builtins \
+    flake8-class-newline \
+    flake8-comprehensions \
+    flake8-deprecated \
+    flake8-docstrings \
+    flake8-import-order \
+    flake8-quotes \
+    setuptools==65.7.0
+
 # Install ROS2 Humble (base version for better performance on Raspberry Pi)
-# You can change to ros-humble-desktop if you need GUI tools and have sufficient resources
 RUN apt-get update && apt-get install -y \
     ros-humble-ros-base \
     ros-dev-tools \
     python3-colcon-common-extensions \
     python3-rosdep \
     python3-argcomplete \
+    ros-humble-cv-bridge \
+    ros-humble-vision-opencv \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize rosdep
@@ -72,44 +86,25 @@ RUN mkdir -p /opt/canusb && \
     # Add to PATH
     ln -sf /opt/canusb/canusb /usr/local/bin/canusb
 
-# Create a script to build and load the CH341 driver at runtime
-# This is more reliable than trying to build during image creation
-RUN mkdir -p /opt/ch341 && \
-    cd /opt/ch341 && \
-    git clone https://github.com/SeeedDocument/USB-CAN-Analyzer.git && \
-    cd USB-CAN-Analyzer/res/Driver && \
-    unzip CH341SER_LINUX.ZIP && \
-    cd CH341SER_LINUX && \
-    # Create a script to build and load the module at runtime
-    echo '#!/bin/bash\n\
-echo "Building CH341 driver for kernel $(uname -r)"\n\
-cd /opt/ch341/USB-CAN-Analyzer/res/Driver/CH341SER_LINUX\n\
-rm -f *.ko *.o *.mod.* Module.*\n\
-make clean\n\
-# Try to install specific kernel headers if generic ones don't work\n\
-if [ ! -d "/lib/modules/$(uname -r)/build" ]; then\n\
-  echo "Kernel headers not found, attempting to install..."\n\
-  apt-get update && apt-get install -y linux-headers-$(uname -r) || true\n\
-fi\n\
-# If headers still not available, try to use the generic ones\n\
-if [ ! -d "/lib/modules/$(uname -r)/build" ] && [ -d "/usr/src/linux-headers-generic" ]; then\n\
-  echo "Using generic headers"\n\
-  ln -sf /usr/src/linux-headers-generic /lib/modules/$(uname -r)/build\n\
-fi\n\
-# Attempt to build\n\
-make\n\
-if [ -f "ch34x.ko" ]; then\n\
-  echo "CH341 driver compiled successfully"\n\
-  # Load the module if running in privileged mode\n\
-  if [ -w "/sys/module" ]; then\n\
-    insmod ch34x.ko && echo "CH341 driver loaded successfully"\n\
-  else\n\
-    echo "Container not running in privileged mode, cannot load module"\n\
-  fi\n\
+# Create script to check for CH341 devices
+RUN echo '#!/bin/bash\n\
+echo "Checking for CH341 USB device..."\n\
+if lsusb | grep -i "ch341"; then\n\
+  echo "CH341 USB device found"\n\
 else\n\
-  echo "CH341 driver compilation failed"\n\
-fi' > /usr/local/bin/build-ch341-driver && \
-    chmod +x /usr/local/bin/build-ch341-driver
+  echo "CH341 USB device not detected. Make sure it is connected."\n\
+fi\n\
+\n\
+echo "Checking for serial devices..."\n\
+if ls /dev/ttyUSB* 2>/dev/null; then\n\
+  echo "Serial devices found. Your CH341 should be one of these."\n\
+else\n\
+  echo "No serial devices found. Please make sure:"\n\
+  echo "1. The CH341 is connected"\n\
+  echo "2. The ch341 module is loaded on the host (sudo modprobe ch341)"\n\
+  echo "3. The container was started with --device=/dev/ttyUSB0 (or similar)"\n\
+fi' > /usr/local/bin/check-devices && \
+    chmod +x /usr/local/bin/check-devices
 
 # Set up the entrypoint
 COPY ./ros_entrypoint.sh /
@@ -120,7 +115,9 @@ ENTRYPOINT ["/ros_entrypoint.sh"]
 RUN python3 --version && pip --version
 
 # Clone the repository
-RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws/src/ros2-mission-2
+RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws
+
+RUN pip3 install -r /ros2_ws/requirements.txt
 
 # Set the default command to bash
 CMD ["bash"]
