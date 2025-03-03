@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  ros2-mission:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ros2-mission
+    environment:
+      - DISPLAY=:1  # Change this to match your VNC server's display number
+      - QT_X11_NO_MITSHM=1
+      - LIBGL_ALWAYS_INDIRECT=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./ros2_ws:/ros2_ws
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    network_mode: host
+    privileged: true
+    tty: true
+    stdin_open: true
+    entrypoint: ["/ros_entrypoint.sh"]
+    command: bash
