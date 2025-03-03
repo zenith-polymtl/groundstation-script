@@ -114,9 +114,16 @@ ENTRYPOINT ["/ros_entrypoint.sh"]
 # Verify Python and pip versions
 RUN python3 --version && pip --version
 
+# Add cache busting for the git clone command
+ARG CACHEBUST=1
+RUN echo "Cache bust: ${CACHEBUST}" > /dev/null
 # Clone the repository
 RUN git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws
 
+# Add cache busting for the pip install command
+ARG CACHEBUST2=1
+RUN echo "Cache bust: ${CACHEBUST2}" > /dev/null
+# Install requirements
 RUN pip3 install -r /ros2_ws/requirements.txt
 
 # Set the default command to bash
