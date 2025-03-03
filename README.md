@@ -13,6 +13,20 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
    ```
 **Please restart the pi after the install**
+## 2. Install docker compose:
+```bash
+# Download Docker Compose binary
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+# Make it executable
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Create a symbolic link
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# Verify installation
+docker-compose --version
+   ```
 
 ## 2. Build docker contrainer
 ```bash

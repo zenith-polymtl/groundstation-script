@@ -106,6 +106,19 @@ else\n\
 fi' > /usr/local/bin/check-devices && \
     chmod +x /usr/local/bin/check-devices
 
+# Add this before the pip install command:
+RUN apt-get update && apt-get install -y \
+  qt6-base-dev \
+  qt6-declarative-dev \
+  libgl1-mesa-dev \
+  libxkbcommon-x11-0 \
+  libxcb-cursor0 \
+  libxcb-icccm4 \
+  libxcb-keysyms1 \
+  libxcb-shape0 \
+  && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --only-binary=PyQt6 PyQt6
+
 # Set up the entrypoint
 COPY ./ros_entrypoint.sh /
 RUN chmod +x /ros_entrypoint.sh
