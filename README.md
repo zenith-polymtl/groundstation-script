@@ -12,6 +12,7 @@ sudo modprobe ch341
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
 sudo apt-get install -y xauth x11-xserver-utils
+sudo systemctl restart ssh
    ```
 **Please restart the pi after the install**
 ## 2. Install docker compose:
