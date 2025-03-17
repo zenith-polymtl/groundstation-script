@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN python3 -m pip install -U \
     colcon-common-extensions \
+    pymavlink \
     vcstool \
     rosdep \
     pytest-cov \
