@@ -109,9 +109,15 @@ RUN apt-get update && apt-get install -y \
 
 
 # Set up the entrypoint
+# Copy the entrypoint script into the image
 COPY ./ros_entrypoint.sh /
-RUN chmod +x /ros_entrypoint.sh
-ENTRYPOINT ["/ros_entrypoint.sh"]
+
+# Install dos2unix, convert the script, and set execute permission
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix /ros_entrypoint.sh && \
+    chmod +x /ros_entrypoint.sh && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # Verify Python and pip versions
 RUN python3 --version && pip --version
