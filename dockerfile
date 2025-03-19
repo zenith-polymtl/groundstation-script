@@ -79,33 +79,6 @@ RUN apt-get update && apt-get install -y \
 # Initialize rosdep
 RUN rosdep init && rosdep update
 
-# Install canusb module
-RUN mkdir -p /opt/canusb && \
-    cd /opt/canusb && \
-    git clone https://github.com/kobolt/usb-can . && \
-    gcc -o canusb canusb.c && \
-    # Add to PATH
-    ln -sf /opt/canusb/canusb /usr/local/bin/canusb
-
-# Create script to check for CH341 devices
-RUN echo '#!/bin/bash\n\
-echo "Checking for CH341 USB device..."\n\
-if lsusb | grep -i "ch341"; then\n\
-  echo "CH341 USB device found"\n\
-else\n\
-  echo "CH341 USB device not detected. Make sure it is connected."\n\
-fi\n\
-\n\
-echo "Checking for serial devices..."\n\
-if ls /dev/ttyUSB* 2>/dev/null; then\n\
-  echo "Serial devices found. Your CH341 should be one of these."\n\
-else\n\
-  echo "No serial devices found. Please make sure:"\n\
-  echo "1. The CH341 is connected"\n\
-  echo "2. The ch341 module is loaded on the host (sudo modprobe ch341)"\n\
-  echo "3. The container was started with --device=/dev/ttyUSB0 (or similar)"\n\
-fi' > /usr/local/bin/check-devices && \
-    chmod +x /usr/local/bin/check-devices
 
 # Add this before the pip install command:
 RUN apt-get update && apt-get install -y \
