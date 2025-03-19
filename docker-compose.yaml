@@ -10,11 +10,12 @@ services:
       - ROS_DOMAIN_ID=69
       - ROS_LOCALHOST_ONLY=0
       - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-      - FASTRTPS_DEFAULT_PROFILES_FILE=/ros2_ws/fastrtps_profile.xml
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/connections/fastrtps_profile.xml
       - VNC_PASSWD=none
       - QT_QPA_PLATFORM=vnc
     volumes:
       - ./ros2_ws:/ros2_ws
+      - ./connections:/connections
     # Replace host networking with bridge mode and explicit port mappings
     expose:
       - "5900:5900"  # VNC port
