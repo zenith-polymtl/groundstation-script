@@ -16,9 +16,10 @@ services:
     volumes:
       - ./ros2_ws:/ros2_ws
     # Replace host networking with bridge mode and explicit port mappings
-    ports:
+    expose:
       - "5900:5900"  # VNC port
-      - "5901:5901"  # Additional VNC port
+      - "5901:5901" 
+    ports: # Additional VNC port
       # ROS2/DDS discovery and communication ports
       - "7400-7500:7400-7500/udp"
     privileged: true
