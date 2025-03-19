@@ -20,7 +20,10 @@ RUN apt-get update && apt-get install -y \
     gcc \
     unzip \
     usbutils \
-    kmod
+    kmod \
+    iputils-ping \
+    iproute2 \
+    apt-file
 
 # Add Universe repository
 RUN add-apt-repository universe
@@ -107,15 +110,21 @@ RUN apt-get update && apt-get install -y \
   libxcb-xkb1 \
   libxkbcommon-x11-0
 
+RUN apt-get update && apt-get install -y \
+  x11vnc \
+  xvfb \
+  fluxbox \
+  && rm -rf /var/lib/apt/lists/*
+
 
 # Set up the entrypoint
 # Copy the entrypoint script into the image
-COPY ./ros_entrypoint.sh /
+COPY ./start_vnc.sh /
 
 # Install dos2unix, convert the script, and set execute permission
 RUN apt-get update && apt-get install -y dos2unix && \
-    dos2unix /ros_entrypoint.sh && \
-    chmod +x /ros_entrypoint.sh && \
+    dos2unix /start_vnc.sh && \
+    chmod +x /start_vnc.sh && \
     rm -rf /var/lib/apt/lists/*
 
 

@@ -7,18 +7,30 @@ services:
       dockerfile: Dockerfile
     container_name: ros2-mission
     environment:
-      - DISPLAY=:1  # Change this to match your VNC server's display number
-      - QT_X11_NO_MITSHM=1
-      - LIBGL_ALWAYS_INDIRECT=1
+      # Remove X11 environment variables since we now use a VNC server.
+      # Keep your ROS-related environment variables.
       - ROS_DOMAIN_ID=69
       - ROS_LOCALHOST_ONLY=0
       - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      # Optionally, you can add additional env variables for your VNC server.
+      # For example, a VNC password (if supported by your VNC server setup).
+      - VNC_PASSWD=none
+      - QT_QPA_PLATFORM=vnc
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/ros2_ws/fastrtps_profile.xml
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Mount your ROS workspace, if needed.
       - ./ros2_ws:/ros2_ws
-    network_mode: host
-    privileged: true
-    tty: true
-    stdin_open: true
-    entrypoint: ["/ros_entrypoint.sh"]
-    command: bash
+    expose:
+      # Expose the internal VNC port. This is the port the Docker
+      # Desktop VNC Viewer extension will use to attach to the container.
+      - "5900"
+      - "5901"
+    network_mode: "host"
+    privileged: true  # May be needed if your setup requires additional privileges.
+    tty: true         # Allocate a TTY for interactive debugging.
+    stdin_open: true  # Keep STDIN open.
+    # Use a custom startup script to initialize Xvfb, window manager, x11vnc, then
+    # launch your ROS2/PyQt6 application.
+    extra_hosts:
+      - "raspberry-pi:172.19.40.72"
+    entrypoint: ["/start_vnc.sh"]
