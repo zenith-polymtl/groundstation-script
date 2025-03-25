@@ -13,6 +13,9 @@ The file must contain:
 "networkingMode=mirrored"
 ```
 
+Search for HyperV service, launch as admin, then:
+![change network](image.png)
+
 ## 1. Install ROS2
 
 You can install manually, or use the steps here:
@@ -37,7 +40,7 @@ chmod +x ./start_vnc.sh
 ```
 ## 5. Run script script:
 ```bash
-./start_vnc.sh
+sudo ./start_vnc.sh
 ```
 
 ## To use VNC for graphical interface:

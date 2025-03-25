@@ -33,6 +33,8 @@ cd /ros2_ws
 colcon build --packages-up-to mission
 source /ros2_ws/install/setup.bash 2>/dev/null || true
 
+cp connections/cycloneDDS_profile.xml /connections/cycloneDDS_profile.xml
+
 export ROS_DOMAIN_ID=1
 export ROS_LOCALHOST_ONLY=0
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
