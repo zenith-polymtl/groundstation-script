@@ -1,14 +1,14 @@
 #!/bin/bash
 # Start Xvfb
-Xvfb :99 -screen 0 1920x1080x24 &
-sleep 2
+# Xvfb :99 -screen 0 1920x1080x24 &
+# sleep 2
 
-# Set display
-export DISPLAY=:99
+# # Set display
+# export DISPLAY=:99
 
-# Start a minimal window manager
-fluxbox -no-slit -no-toolbar &
-sleep 1
+# # Start a minimal window manager
+# fluxbox -no-slit -no-toolbar &
+# sleep 1
 
 # Source ROS environment 
 source /opt/ros/humble/setup.bash
@@ -37,11 +37,11 @@ export ROS_DOMAIN_ID=1
 export ROS_LOCALHOST_ONLY=0
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI=file:///connections/cycloneDDS_profile.xml
-export VNC_PASSWD=none
+# export VNC_PASSWD=none
 
 # Set Qt to use VNC platform but not bind to specific port
 # Let it choose a different port than 5900
-export QT_QPA_PLATFORM=vnc:size=1920x1080:port=5901
+# export QT_QPA_PLATFORM=vnc:size=1920x1080:port=5901
 
 # Launch application
 echo "Starting mission control application..."
