@@ -82,3 +82,17 @@ And use this command to run before launching ros2 script
 export QT_QPA_PLATFORM=vnc
 ros2 run mission control
 ```
+
+```bash
+ros2 run demo_nodes_cpp talker --ros-args --remap __node:=talker
+```
+```bash
+ros2 run demo_nodes_cpp listener --ros-args --remap __node:=listener
+```
+
+Set-NetFirewallHyperVVMSetting -Name '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -DefaultInboundAction Allow
+
+Set-NetFirewallHyperVVMSetting -Name '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' -DefaultOutboundAction Allow
+
+"networkingMode=mirrored"
+
