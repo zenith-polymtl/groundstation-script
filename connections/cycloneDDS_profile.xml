@@ -1,7 +1,7 @@
 <CycloneDDS xmlns="https://cdds.io/config">
   <Domain id="any">
     <General>
-      <NetworkInterfaceAddress>eth1</NetworkInterfaceAddress>
+      <NetworkInterfaceAddress>auto</NetworkInterfaceAddress>
       <AllowMulticast>true</AllowMulticast> 
     </General>
     <Tracing>
