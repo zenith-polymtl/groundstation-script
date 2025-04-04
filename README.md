@@ -32,6 +32,7 @@ sudo apt-get update && sudo apt-get install -y  ros-humble-rmw-cyclonedds-cpp ro
 ```bash
 git clone https://github.com/zenith-polymtl/groundstation-script.git
 cd groundstation-script
+sudo cp ./connections/ / -r
 ```
 
 ## 5. Enable script:

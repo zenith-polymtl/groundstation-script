@@ -28,17 +28,19 @@ else
   pip3 install --only-binary=PyQt6 PyQt6
 fi
 
+
 # Build and run
 cd /ros2_ws
 colcon build --packages-up-to mission
 source /ros2_ws/install/setup.bash 2>/dev/null || true
 
-# cp connections/cycloneDDS_profile.xml /connections/cycloneDDS_profile.xml
+
+
 
 export ROS_DOMAIN_ID=1
 export ROS_LOCALHOST_ONLY=0
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-export CYCLONEDDS_URI="connections/cycloneDDS_profile.xml" 
+export CYCLONEDDS_URI=file:///connections/cycloneDDS_profile.xml
 # export VNC_PASSWD=none
 
 # Set Qt to use VNC platform but not bind to specific port
