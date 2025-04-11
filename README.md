@@ -13,8 +13,6 @@ The file must contain:
 "networkingMode=mirrored"
 ```
 
-Search for HyperV service, launch as admin, then:
-![change network](image.png)
 
 ## 2. Install ROS2
 
