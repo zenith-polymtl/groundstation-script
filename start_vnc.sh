@@ -19,10 +19,12 @@ if [ ! -d "/ros2_ws/.git" ]; then
   rm -rf /ros2_ws/* /ros2_ws/.[!.]*
   git clone https://github.com/zenith-polymtl/ros2-mission-2 /ros2_ws
   cd /ros2_ws
+  git checkout dev
   pip3 install -r requirements.txt
   pip3 install --only-binary=PyQt6 PyQt6
 else
   cd /ros2_ws
+  git checkout dev
   git pull
   pip3 install -r requirements.txt
   pip3 install --only-binary=PyQt6 PyQt6
